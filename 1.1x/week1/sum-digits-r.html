@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+    // 
+    // Рекурсивно сложить все числа, из которых состоит переданное число:
+    function sumDigitsR(number) {
+        if (number <= 0) {
+            return 0;
+        }
+
+        return (number % 10) + sumDigitsR(integerDivision(number, 10));
+    }
+
+    console.log(sumDigitsR(1234));
+
+    /**
+     * Integer division
+     *
+     * @example
+     * // returns 12
+     * integerDivision(123, 10);
+     *
+     * @example
+     * // returns 2
+     * integerDivision(155, 55);
+     * @returns {Number} Returns result of the division without remainder (integer part).
+     */
+    function integerDivision(number, divisor) {
+        return (number - number % divisor) / divisor; // ES5
+    }
+    // Math.trunc(number / divisor); // ES6
+
+    function sum3Digits(number) {
+        var ones = number % 10;
+        var tens = integerDivision(number, 10) % 10;
+        var hundreds = integerDivision(number, 100) % 10;
+
+        return ones + tens + hundreds;
+    }
+
+    console.log(sum3Digits(123));
+    </script>
+</body>
+
+</html>
