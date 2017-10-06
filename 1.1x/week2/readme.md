@@ -1,12 +1,133 @@
-# Recursion, loops, and invariant programming
+# Lesson 2: Recursion, loops, and invariant programming
+## Overview of invariant programming
+Темы урока:
+* Инвариантное программирование. Invariant — a mathematical formula that is true at each recursive call.
+* Спецификация функции (математическое представление того, что она делает). Specification — a mathematical formula that defines what the function calculates.
+* Аккумулятор
+* Принцип сообщающихся сосудов
+
 Циклы можно реализовать с помощью хвостовой рекурсии (tail recursion), когда рекурсивный вызов происходит в конце тела функции.
 
-Цикл — форма рекурсии (tail recursion, хвостовая рекурсия), в которой повторный вызов функции происходит в конце ее тела.
+Цикл — форма рекурсии, в которой повторный вызов функции происходит в конце ее тела.
 
 ## Invariant
-Неизменяемый код эффективен при создании циклов.
+Инвариант — это формула, условие, которое остается неизменным (`true`) при выполнении каждой итерации. Такие формулы используют в рекурсиях, чтобы избавится от заполнения стэка. Чтоб все вычисления происходили внутри функции, без вызова и вместо такого: `N * {Factorial N - 1}` было бы такое: `{Factorial I-1 I*A}` (с аккумулятором).
 
-Invariant formula — всегда `true` во время исполнения. True loop — рекурсивная формула, которая всегда выполняется.
+## Factorial with communicating vases
+На примере факториала. Факториал от `n` (обозначается `n!`) — это перемножение последовательности чисел: `1 * 2 * 3 * ... * n`. Факториал от `0` равен `1`, поэтому на самом деле будет: `1 * 1 * 2 * 3 * ... * n`. Что можно записать так:
+
+```
+n! = n * (n - 1)! если n > 0
+n! = 1 если n == 0
+```
+
+Рекурсивная функция для вычисления:
+
+```oz
+declare
+fun {Fact1 N}
+   if N == 0 then 1
+   else N * {Fact1 (N - 1)}
+   end
+end
+
+{Browse {Fact1 4}}
+```
+
+Такой функции надо на каждой итерации сохранять значение `{Fact1 (N - 1)}` в стэке, чтоб потом их все перемножить. Это дорого.
+
+Если абстрагироваться от переменных справа, можно записать так:
+
+```
+n! = i! * a
+```
+
+То есть мы имеем какой-то факториал `i!`, который умножается на какое-то `a` и мы получаем `n!`.
+
+При `i == n` и `a == 1` мы получим `n! = n! * 1`. Ну тут хер поспоришь.
+
+А если у нас будет `i == 0`, то результатом будет `a`: `n! = 0! * a` (чтобы равенство выполнялось наше `a` как раз должно быть как `n!`).
+
+Пример, где `n == 4`. Помним, что `4! = 4 * 3 * 2 * 1 * 1`. Получим ряд истинный выражений (все равенства `true`):
+
+```
+4! == 4! * 1
+4! == 3! * (4 * 1)             == 3! * 4
+4! == 2! * (4 * 3 * 1)         == 2! * 12
+4! == 1! * (4 * 3 * 2 * 1)     == 1! * 24
+4! == 0! * (4 * 3 * 2 * 1 * 1) == 0! * 24
+```
+
+Мы можем представить тождество по-разному, передавая куски из `i` в `a`. В этом и заключается принцип сообщающихся сосудов (инвариантная формула).
+
+Получается, что на каждой итерации у нас появляется `i' = i - 1` и `a' = i * a`, которые передадутся в следующий вызов. И так будет до тех пор, пока мы не уменьшим `i` до `0` (пока все значения из `i` не перетекут в `a`). Начальные значение  `i` — число, от которого надо вычислить факториал, `a` — единица:
+
+```
+Факториал (i, a) {
+    если i == 0
+        вернуть a
+    иначе
+        вернуть Факториал (i - 1, i * a) // то есть Факториал (i', a')
+}
+```
+
+Получим такое:
+
+```oz
+declare
+fun {Fact2 I A}
+   if I == 0 then A
+   else {Fact2 (I - 1) (A * I)}
+   end
+end
+
+{Browse {Fact2 4 1}}
+```
+
+Так норм, нигде ничего не надо сохранять, все дешево.
+
+## Sum of digits with communicating vases
+Рекурсивная функция, которая считает суммирует все цифры переданного интеджера:
+
+```oz
+declare
+fun {SumDigitsR N}
+   if (N == 0) then 0
+   else
+      (N mod 10) + {SumDigitsR (N div 10)}
+   end
+end
+
+{Browse {SumDigitsR 314159}}
+```
+
+Кажется, что тут особо менять нечего. Но на самом деле есть более эффективный способ сделать такое вычисление.
+
+Например, `n=314159`. Нам нужно просуммировать эти числа. Представить это можно так:
+
+```
+s(314159) = s(314159) + 0
+s(314159) = s(31415) + 9
+s(314159) = s(3141) + 14
+s(314159) = s(314) + 15
+s(314159) = s(31) + 19
+s(314159) = s(3) + 20
+s(314159) = s(0) + 23 = 0 + 23 = 23
+```
+
+Инвариант: `s(n) = s(dk-1, dk-2, ···, di) + (di-1 + di-2 + ··· + d0)`. Получаем новую функцию:
+
+```oz
+declare
+fun {SumDigits2 S A}
+    if S==0 then A
+        else {SumDigits2 (S div 10) A + (S mod 10)}
+    end
+end
+```
+
+## The golden rule of tail recursion
+
 
 ## Затраты рекурсии
 **Sum**
@@ -51,44 +172,38 @@ The signature is:
 
 Решение в файле `sum.oz`.
 
+## The golden rule of tail recursion
+[Слайды](https://d37djvu3ytnwxt.cloudfront.net/assets/courseware/v1/aa216449e7f6438be93d75ff35767dc2/asset-v1:LouvainX+Louv1.1x+3T2017+type@asset+block/2-4tailrecursionFigure.pdf)
 
-## Задача Mirror
-Mirror
-You will work with the Reverse function, which may reverse an integer, a word, a sentence, etc. For instance, reversing a string S may be useful to observe if S is a palindrome. Indeed, if S == {Reverse S} then S is a palindrome. There are lots of applications in which Reverse is useful. You will certainly be tempted, in the future, to use it. Therefore, you have to implement it yourself, in order to know how it could be done.
+Рекурсивную ф-ю можно написать математически и инвариантно. Первая будет неоптимальной, плохо будет работать, но понятной. Вторая — более заморочной, но работать будет лучше.
 
-This exercise is focused on the use of accumulators. Using accumulators allows you to keep a stack of constant size during the recursion calls. You are asked to use accumulators to reverse an integer. For instance, given 1234, you are asked to return 4321. Do not consider integers with zeros.
+Инвариантная версия (сообщающиеся сосуды) принимает 2 аргумента (добавляется аккумулятор). И рекусивный вызов функции — последний в коде тела функции. Нет никаких операций с вызываемой функции, она просто вызывается с новыми аргументами.
 
-At the beginning of each call to {Mirror Int Acc}, the following condition must be true:
+Использовать в программах математическую рекурсию не правильно. Это ведет к огромным вычислительным затратам. Надо юзать хвостовую рекурсию (то есть инвариантное программирование, принцип сообщающихся сосудов). Найти инвариантную формулу и юзать ее — создать **true loop**.
 
-Let I be the integer to reverse, `Digits(X)` a function returning 0 if X=0 and the number of digits in X if `X>0`, then:
+Декларативная версия true loop: инвариантная формула, single assignment (переменные не переопределяются):
 
-```
-I == (Int*(10^Digits(Acc))) + MainMirror(Acc)
-```
-
-Note: You must not use this Digits or any other defined Digits to solve this exercise.
-
-You will want to use div (it returns the quotient of the Euclidian division) and mod (it returns the remainder of the Euclidian division) to solve this problem.
-
-Решение: mirror.oz
-
-## Задача Prime
-Prime
-This exercise is focused on the use of accumulators. Using accumulators allows you to keep a stack constant size during the recursion calls.
-
-In this exercise, you are asked to use accumulators in order to determine if a number is prime. A prime number is a number that can be divided only by 1 and by itself (euclidean division without remainder).
-
-Consider your code in the following template:
-
-fun {Prime N}
-    %Your code here.
+```oz
+fun {While S}
+  if {IsDone S} then S
+  else {While {Transform S}} end % tail recursion
 end
-{Prime N}
-Please note that 1 is not considered as a prime number ({Prime 1} == false) and that N >= 1.
+```
 
-Write the Prime function, which returns true if N is a prime number and false otherwise.
+Императивная (используется multiple assignment, можно переопределять переменные):
 
-Note: You must only write the body of the function. The signature and the final end must not be written.
+```c++
+state whileLoop(state s) {
+  while (!isDone(s))
+    s = transform(s); /* destructive assignment */
+  return s;
+}
+```
+
+Задача Prime.
+
+## Invariant programming to calculate powers
+
 
 ## Задача: Числа Фибоначчи
 Fib
