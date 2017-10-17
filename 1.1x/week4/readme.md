@@ -9,7 +9,7 @@
 ## Contextual environment
 В этом примере выведется `100`:
 
-```oz
+``` oz
 local P Q in
    proc {P}
       {Browse 100}
@@ -37,13 +37,13 @@ Procedures are values in memory. Variables are bound to procedure values.
 
 На самом деле такая запись — синтаксический сахар:
 
-```oz
+``` oz
 proc {Inc X Y} Y=X+A end
 ```
 
 На самом деле идентификатор `Inc` привязывается (bound to) к анонимной процедуре:
 
-```oz
+``` oz
 Inc = proc {$ X Y} Y=X+A end
 ```
 
@@ -51,7 +51,7 @@ Inc = proc {$ X Y} Y=X+A end
 
 В памяти значение процедуры хранится как пара: код процедуры и ее контекст:
 
-```oz
+``` oz
 inc = (proc {$ X Y} Y=X+A end, {A->a})
 ```
 
@@ -59,7 +59,7 @@ inc = (proc {$ X Y} Y=X+A end, {A->a})
 
 Еще пример:
 
-```oz
+``` oz
 local D=2 in
     proc {Add B C E}
        E = B + C + D
@@ -83,7 +83,7 @@ Genericity is when a function is passed as an input.
 
 Пример — функция `Map`:
 
-```oz
+``` oz
 declare
 fun {Map F L}
     case L of nil then nil
@@ -98,7 +98,7 @@ end
 ## Instantiation
 Instantiation is when a function is returned as an output.
 
-```oz
+``` oz
 declare
 fun {MakeAdd A}
     fun {$ X}
@@ -114,7 +114,7 @@ Add5 = {MakeAdd 5}{Browse {Add5 100}}
 ## Function composition
 We take two functions as input and return their composition:
 
-```oz
+``` oz
 declare
 fun {Compose F G}
    fun {$ X}
@@ -134,7 +134,7 @@ Fnew = {Compose fun {$ X} X*X end
 ## Encapsulation
 We can hide a value inside a function:
 
-```oz
+``` oz
 declare
 fun {Zero}
     0
@@ -154,7 +154,7 @@ Three = {Inc {Inc {Inc Zero}}}
 This is the foundation of encapsulation as used in data abstraction
 What is the difference if we write Inc as follows:
 
-```oz
+``` oz
 fun {Inc H}
     fun {$}
         {H} + 1

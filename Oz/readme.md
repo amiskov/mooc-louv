@@ -2,7 +2,7 @@
 
 ### Lists
 
-```oz
+``` oz
 declare
 L = [1 2 3]
 M = {Append L L}
