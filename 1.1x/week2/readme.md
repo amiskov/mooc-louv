@@ -23,7 +23,7 @@ n! = 1 если n == 0
 
 Рекурсивная функция для вычисления:
 
-```oz
+``` oz
 declare
 fun {Fact1 N}
    if N == 0 then 1
@@ -73,7 +73,7 @@ n! = i! * a
 
 Получим такое:
 
-```oz
+``` oz
 declare
 fun {Fact2 I A}
    if I == 0 then A
@@ -89,7 +89,7 @@ end
 ## Sum of digits with communicating vases
 Рекурсивная функция, которая считает суммирует все цифры переданного интеджера:
 
-```oz
+``` oz
 declare
 fun {SumDigitsR N}
    if (N == 0) then 0
@@ -117,7 +117,7 @@ s(314159) = s(0) + 23 = 0 + 23 = 23
 
 Инвариант: `s(n) = s(dk-1, dk-2, ···, di) + (di-1 + di-2 + ··· + d0)`. Получаем новую функцию:
 
-```oz
+``` oz
 declare
 fun {SumDigits2 S A}
     if S==0 then A
@@ -151,7 +151,7 @@ For `sum(n)`, your answer has to be:
 ## Задача Sum
 Consider your code in the following template:
 
-```oz
+``` oz
 fun {MainSum N}
     local Sum in
         fun {Sum N Acc}
@@ -183,7 +183,7 @@ The signature is:
 
 Декларативная версия true loop: инвариантная формула, single assignment (переменные не переопределяются):
 
-```oz
+``` oz
 fun {While S}
   if {IsDone S} then S
   else {While {Transform S}} end % tail recursion
@@ -216,7 +216,7 @@ X<sup>n</sup> = X * X<sup>n-1</sup>, при `n > 0`
 
 По-простому, получим:
 
-```oz
+``` oz
 declare
 fun {Pow X N}
    if N == 0 then 1
@@ -244,7 +244,7 @@ X<sup>n</sup> = Y<sup>2</sup>, где Y = X<sup>n/2</sup> при `n > 0` и `n` 
 
 Получим:
 
-```oz
+``` oz
 declare
 fun {Pow X N}
    if N == 0 then 1

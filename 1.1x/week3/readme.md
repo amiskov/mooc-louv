@@ -1,7 +1,9 @@
 # Lists and pattern matching
 
-## Lists
+## Lists informally
 Составные типы данных (compound data type).
+
+Список — упорядоченная последовательность элементов (0 или больше). Могут содержать другие списки.
 
 Списки придумали в Лиспе.
 
@@ -11,36 +13,86 @@
 
 Похоже, в Озе по-другому, чем в Липе. В лиспе все — пары, в Озе — последовательность.
 
+```oz
+declare
+L = [1 2 3] % declaring list
+{Browse L}
+
+declare
+M={Append L L} % append list L to L
+{Browse M}
+
+declare
+N=nil % empty list
+{Browse N}
+```
+
+Списки — значения. Они, как и простые типы в Oz, — значения и не могут быть изменены.
+
+**В Oz списки могут содержать значения разных типов.** Это норма:
+
+```oz
+declare
+L = [[1] 2 'a'] % ok
+```
+
+## Defining lists with grammar rules
+Список — рекурсивный тип данных. То есть он определяется в своих же терминах (defined in terms of itself):
+
+Список представляет собой либо пустой список (`nil`), либо пару элементов
+определенного типа, за которой следует другой список. [Wiki](https://ru.wikipedia.org/wiki/Список_(информатика))
+
+Рекурсия, помимо вычислений (в функциях), используется и в данных (определение типов данных).
+
+Для обхода данных рекурсивных типов используются рекурсивные функции.
+
+Синтаксическое представление списков в нотации [EBNF](https://ru.wikipedia.org/wiki/Расширенная_форма_Бэкуса_—_Наура):
+
 ```
 <List T> ::= nil | T '|' <List T>
 ```
 
-`'|'` — это часть синтаксиса. То есть в Oz синтаксис для определения списка такой:
+`|` — палка без скобок — это OR.
 
-```oz
+`'|'` — палка в скобках — это часть синтаксиса. То есть в Oz синтаксис для определения списка такой:
+
+``` oz
 declare
-L = 1|2|3|nil % список из трех элементов
-M = [1 2 3] % то же самое, синтаксический сахар, менее формально
+L = 1|2|3|nil   % список из трех элементов
+M = [1 2 3]     % то же самое, синтаксический сахар, менее формально
 {Browse L == M} % true
 ```
+
+> And just like sugar is not usually good for you if you eat too much, too much syntactic sugar is not good for the clarity. But a little bit is good.
+
+`1|2|3|nil` is equivalent to `1|(2|(3|nil))`. В Oz можно использовать скобки в списках для группировки.
 
 Представление списка `[10 11 12]`:
 
 ```
-10 | <List <int>>
-10 | 11 | <List <int>>
-10 | 11 | 12 | <List <int>>
+nil
+10 | nil
+10 | 11 | nil
 10 | 11 | 12 | nil
 ```
 
-Графическое представление:
+## Useful representations for lists
+Можно представить список целых чисел (`<List <int>>`) вот так:
+
+```
+10 | <List <int>>           # 10 и список
+10 | 11 | <List <int>>      # 10, 11 и список
+10 | 11 | 12 | <List <int>> # 10, 11, 12 и список
+10 | 11 | 12 | nil          # в конце `<List <int>>` станет `nil`
+```
+
+Список — частный случай дерева. Графическое представление:
 
 ![](list_graph_example.png)
 
-Список — случай дерева.
 
 ## Операции со списками
-```oz
+``` oz
 X1 = [1 2 3]
 {Browse X1.1} % 1, Head / car
 {Browse X1.2} % [2 3], Tail / cdr
@@ -64,7 +116,7 @@ end
 ### Tail recursion for lists
 Поэтапное создание списка:
 
-```oz
+``` oz
 declare X1 X2 in
 X1 = 6|X2
 
@@ -85,7 +137,7 @@ X3 = nil
 
 Список — рекурсивная структура данных. Для работы с ним используются рекурсивные функции:
 
-```oz
+``` oz
 % Recursive funciton on list
 % Sum of elements
 declare
@@ -107,7 +159,7 @@ end
 
 Получить N-й элемент списка напрямую нельзя, т. к. список — это значение, за которым следует еще один список. Нужно использовать рекурсию:
 
-```oz
+``` oz
 % Nth element of a list
 declare
 fun {Nth L N}
@@ -133,7 +185,7 @@ In this exercise, you are asked to produce a list containing the n first factori
 
 
 ## Pattern Matching
-```oz
+``` oz
 % Not tail recursive
 declare
 fun {Sum L}
@@ -194,7 +246,7 @@ Kernel languare для Oz (почти полный):
 
 
 ## Append
-```oz
+``` oz
 declare
 fun {Append L1 L2}
    case L1
@@ -207,7 +259,7 @@ end
 
 Эта же функция на kernel language:
 
-```oz
+``` oz
 declare
 proc {Append L1 L2 L3}
    case L1 of nil then L3=L2
