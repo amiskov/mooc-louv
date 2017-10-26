@@ -88,8 +88,7 @@ nil
 
 Список — частный случай дерева. Графическое представление:
 
-![](list_graph_example.png)
-
+<img src="list_graph_example.png" width="300">
 
 ## Операции со списками
 ``` oz
